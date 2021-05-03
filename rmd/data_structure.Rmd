@@ -11,8 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # General Data Format and Preparation
 
-This section summarizes general formatting and preparation guidelines for all data
-shared and uploaded to fortedata. 
+This document summarizes general formatting and preparation guidelines for all data
+shared and uploaded to fortedata. It then provides a workflow for data to be uploaded 
+to the shared forte google drive using the 'googledrive' R package.
 
 ## Naming files and folders
 
@@ -20,7 +21,7 @@ shared and uploaded to fortedata.
 2. File Type: CSV (Comma delimited)
 3. Filenames: "data_type_year.csv" (i.e. "canopy_dendroband_2019.csv")
 4. Folder Names: "data_type" (i.e. "canopy_dendroband")
-5. README.txt file included in every folder (see README.txt file structure)
+5. Include EML approved word document metadata file in each folder
 5. Each year should be 1 data file (but does this make sense for instrument data?)
 
 ## General File Structure and Format
@@ -34,3 +35,7 @@ shared and uploaded to fortedata.
 + subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e "A01E");**SHOULD NOT** include separate replicate, plot, and subplot columns
 + date -- Date of data collection (YYYY-MM-DD)
 + notes
+
+## Data Workflow: Field Data to fortedata 
+
+provide a workflow with example code to clean data and upload to shared googledrive 

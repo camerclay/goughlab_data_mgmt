@@ -33,3 +33,4 @@ shared and uploaded to fortedata.
 3. Required columns:
 + subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e "A01E");**SHOULD NOT** include separate replicate, plot, and subplot columns
 + date -- Date of data collection (YYYY-MM-DD)
++ notes

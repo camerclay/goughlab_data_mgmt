@@ -28,14 +28,137 @@ to the shared forte google drive using the 'googledrive' R package.
 
 1. Each row is one observation
 2. Column names should:
-+ Be lowercase with "_" separating words 
-+ Include units if quantitative (i.e. "DBH_cm"; Flux units excluded)
-+ Be added to `forte_table_metadata.csv` (if not already listed)
+  + Be lowercase with "_" separating words 
+  + Include units if quantitative (i.e. "DBH_cm"; Flux units excluded)
+  + Be documented in metadata (fortedata: added to `forte_table_metadata.csv`) 
 3. Required columns:
-+ subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e "A01E");**SHOULD NOT** include separate replicate, plot, and subplot columns
-+ date -- Date of data collection (YYYY-MM-DD)
-+ notes
+  + Experimental unit id (i.e. plot/subplot)
+  + fortedata: subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e   "A01E");**SHOULD NOT** include separate replicate, plot, and subplot columns
+  + date -- Date of data collection (YYYY-MM-DD)
+  + notes
 
 ## Data Workflow: Field Data to fortedata 
 
-provide a workflow with example code to clean data and upload to shared googledrive 
+Ideally all data products are properly formatted and structured from the start of 
+data collection, but sometimes there are a few adjustments that will make your data more readable and match any required formatting. Here is an example "cleaning" script used to 
+get subcanopy diameter data into proper format for the fortedata package. 
+
+```{r cleaning, include=TRUE, eval=FALSE}
+# this script is an ingestion script for the subcanopy diameter data, and the 
+# the subcanopy stem counts.
+
+if (!require("googledrive")) {
+  install.packages("googledrive")
+}
+
+# Bring in the desired csv's and make the format matching. Then upload them to 
+# google drive 
+
+sc_2019 <- read.csv("data/subcanopy_D.csv", na.strings = c("", "NA"))
+sc_2020 <- read.csv("data/subcanopy_D_2020.csv", na.strings = c("", "NA"))
+
+# since 2020 is more tidy, I will start there and then reformat 2019 to match it 
+# First step will be to rename column names to match other fortedata products 
+
+# seperate the uniqueID column into subplot and nested_subplot
+# this creates a new nested_subplot column and creates a notes column to match 2019
+# *see my data was kind of messy! My uniqueID column did not match fortedata requirements
+#  and I was missing a notes column in 2020
+sc_2020$nested_subplot <- substr(sc_2020$uniqueID, 5, 5)
+sc_2020$notes <- "NA"
+
+# this deletes the nested subplot ID from the uniqueID column leaving only the subplot_id
+sc_2020$uniqueID <- gsub('.$', '', sc_2020$uniqueID)
+
+# make all column names lowercase 
+names(sc_2020) <- tolower(names(sc_2020))
+
+# now rename columns to match other forte data products
+names(sc_2020)[names(sc_2020) == "uniqueid"] <- "subplot_id"
+names(sc_2020)[names(sc_2020) == "subplotid"] <- "subplot_id"
+
+# now drop unwanted columns and reorder 
+sc_2020 <- sc_2020[c("subplot_id", "nested_subplot", "tag", "species", "dbh_mm", 
+                     "date", "notes")]
+
+#####################################################################################
+# Now lets work on the 2019 data 
+
+# make all column names lowercase 
+names(sc_2019) <- tolower(names(sc_2019))
+
+# change veg_plot to nested_subplot and fix subplotid
+names(sc_2019)[names(sc_2019) == "veg_plot"] <- "nested_subplot"
+names(sc_2019)[names(sc_2019) == "subplot"] <- "subplot_id"
+
+# select the wanted columns and re order 
+sc_2019 <- sc_2019[c("subplot_id", "nested_subplot", "tag", "species", "dbh_mm", 
+                     "date", "notes")]
+
+# change both 2019 and 2020 to have to same data classes for each vector; data classes 
+# for variables already in fortedata metadata should conform to established classes 
+
+# change 2020 nested to int, 2020 and 2019 date to date, 2020 notes to character
+sc_2020$nested_subplot <- as.integer(sc_2020$nested_subplot)
+sc_2019$date <- as.Date(sc_2019$date, "%Y-%m-%d")
+sc_2020$date <- as.Date(sc_2020$date, "%Y-%m-%d")
+
+#####################################################################################
+# alright now they are properly formated and ready to go onto fortedata. 
+# upload to google drive 
+
+# first, write csv's. These will save in your 'data' folder and then you will upload
+# them to google drive. Unfortunately there is not a way (that I know of...) to move
+# directly from an R dataframe to google drive, so we need this intermediate step.
+# Make sure to name them something different than the original files. In the case of 
+# fortedata, use 'fd' at the start to signify it's ready to go to the package
+write.csv(sc_2019, "data/fd_subcanopy_diameter_2019.csv", row.names = FALSE)
+write.csv(sc_2020, "data/fd_subcanopy_diameter_2020.csv", row.names = FALSE)
+
+# find the folder pathway on mydrive and assign it to an object, in this case I called
+# it 'y'
+x <- drive_find(type = "folder", pattern = "subcanopy_diameter", n_max = 6)
+y <- x[[1,2]]
+
+# now upload using the file id we located above 
+drive_upload(
+  "data/fd_subcanopy_diameter_2019.csv", # this is the name of the file on your machine 
+  name = "fd_subcanopy_diameter_2019", # this is the name of the file on googledrive
+  path = as_id(y), # this identifies the path to which you've assigned the letter 'y'
+  overwrite = TRUE # this overwrites a file with the same name in the googledrive
+)
+
+# do the same for 2020
+# now upload using the file id we located above 
+drive_upload(
+  "data/fd_subcanopy_diameter_2020.csv",
+  name = "fd_subcanopy_diameter_2020",
+  path = as_id(y),
+  overwrite = TRUE
+)
+########################################################################
+# subcanopy stem counts reformatting
+
+stem_counts <- read.csv("data/subcanopy_stemcounts.csv", na.strings = c("", "NA"))
+
+# rename subplot column
+names(stem_counts)[names(stem_counts) == "subplot"] <- "subplot_id"
+
+# select wanted columns
+stem_counts <- stem_counts[c("subplot_id", "species", "count", "plot_area_m2", "date")]
+
+# change date to date class
+stem_counts$date <- as.Date(stem_counts$date, "%Y-%m-%d")
+
+# save the new csv
+write.csv(stem_counts, "data/fd_subcanopy_stem_count_2019.csv", row.names = FALSE)
+
+# upload to drive
+drive_upload(
+  "data/fd_subcanopy_stem_count_2019.csv",
+  name = "fd_subcanopy_stem_count_2019",
+  path = as_id(y),
+  overwrite = TRUE
+)
+
+```

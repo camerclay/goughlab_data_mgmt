@@ -1,5 +1,5 @@
 ---
-title: "data_structure"
+title: "Data Format, Structure, and Workflows"
 author: "Maxim Grigri"
 date: "May 3, 2021"
 output: html_document
@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # General Data Format and Preparation
+
+***
 
 This document summarizes general formatting and preparation guidelines for all data
 shared and uploaded to fortedata. It then provides a workflow for data to be uploaded 
@@ -33,15 +35,23 @@ to the shared forte google drive using the 'googledrive' R package.
   + Be documented in metadata (fortedata: added to `forte_table_metadata.csv`) 
 3. Required columns:
   + Experimental unit id (i.e. plot/subplot)
-  + fortedata: subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e   "A01E");**SHOULD NOT** include separate replicate, plot, and subplot columns
+  + **fortedata**: subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e   "A01E")
+  + **SHOULD NOT** include separate replicate, plot, and subplot columns
   + date -- Date of data collection (YYYY-MM-DD)
   + notes
+
+***
 
 ## Data Workflow: Field Data to fortedata 
 
 Ideally all data products are properly formatted and structured from the start of 
 data collection, but sometimes a few adjustments are needed to make your data more readable and match any required formatting. Here is an example "cleaning" script used to 
-get subcanopy diameter data into proper format for the fortedata package. Most important here, is the 1) Use of the 'googledrive' package to move smoothly from R to google drive, and 2) some examples of using base R for reformatting (Who ever uses base R!?)
+get subcanopy diameter data into proper format for the fortedata package. Most important here is the 1) Use of the 'googledrive' package to move smoothly from R to google drive, and 2) some examples of using base R for reformatting (Who ever uses base R!?). In the example of fortedata, there are a few steps you might have to take before using this code below.
+
+1. Make sure that the 'fortedata' shared google drive folder is in "My Drive"
+  + Click the dropdown menu next to "My Drive". If FoRTE is listed there, you can skip the following steps. If FoRTE is not there...
+2. Click "Shared with me"" (assuming this folder was shared with you at some point) and locate the FoRTE shared folder.
+3. Right click and select "Add Shortcut to Drive". Now you can access this shared folder from "My Drive" using the 'googledrive' R package.
 
 ```{r cleaning, include=TRUE, eval=FALSE}
 # this script is an ingestion script for the subcanopy diameter data. In this example, 

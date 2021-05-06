@@ -23,8 +23,8 @@ to the shared forte google drive using the 'googledrive' R package.
 2. File Type: CSV (Comma delimited)
 3. Filenames: "data_type_year.csv" (i.e. "canopy_dendroband_2019.csv")
 4. Folder Names: "data_type" (i.e. "canopy_dendroband")
-5. Include EML approved word document metadata file in each folder
-5. Each year should be 1 data file (but does this make sense for instrument data?)
+5. Include EML approved word document metadata file in each folder (Thanks JT!)
+5. Each year should be 1 data file (but does this make sense for instrument data? Thoughts on this?)
 
 ## General File Structure and Format
 
@@ -32,7 +32,7 @@ to the shared forte google drive using the 'googledrive' R package.
 2. Column names should:
   + Be lowercase with "_" separating words 
   + Include units if quantitative (i.e. "DBH_cm"; Flux units excluded)
-  + Be documented in metadata (fortedata: added to `forte_table_metadata.csv`) 
+  + Be documented in metadata (**fortedata**: added to `forte_table_metadata.csv`) 
 3. Required columns:
   + Experimental unit id (i.e. plot/subplot)
   + **fortedata**: subplot_id -- replicate ("A-") plot ("-01-") subplot ("-E") (i.e   "A01E")
@@ -42,25 +42,26 @@ to the shared forte google drive using the 'googledrive' R package.
 
 ***
 
-## Data Workflow: Field data to fortedata format
+## Data Workflow: Field data to FoRTE share google drive folder as an example
 
 1. Use google "Back Up and Sync" to backup your local data folder to google drive 
   + This ensures all your data and scripts are backed up incase your local machine dies
   or you throw it in the James or "accidently" drop in the can when R is giving you a hard time.
-  + A couple things to note: 1) You can find this backed-up folder in the "Computers", "My Lapbtop"
+  + A couple things to note: 1) You can find this backed-up folder in the "Computers", "My Laptop"
   tab on your google drive. 2) You can create a shortcut (right click, "Add shortcut to drive") and add 
   it to "My Drive" and likewise a shared folder. 3) When working on an R project, R hates the constant updates to google drive, so you have to pause "Back Up and Sync" while working on a project. Just make sure to resume updates after to ensure all of your work is backed up!  
 2. FoRTE or LTREB will differ slightly, but for either, make sure the raw data files are available in
   a shared google drive folder (i.e. FoRTE or LAB). There are 2 ways to do this:
   + Ideally, create a shortcut of your backed up folder (right click, "Add shortcut to drive") and add it to a shared folder. This way, as you update your data file, the updates/new data are automatically backed up to the shared folder. 
   + Alternately, you can copy the data file into a shared folder OR upload it to a shared folder from your     local machine. This works fine for say a full years worth of data from prior field seasons, or uploading     your data at the end of a season to a **shared folder** (BUT your data is already backed up to google drive because of step 1 above, right!?)  
+  
+Okay, (sigh) now your raw data is safe, backed up, and shared with the group. Ideally all data products are properly formatted and structured from the start of data collection, BUT oops, sometimes it kinda looks like poo-poo and it needs some fine-tuning because you didn't read my carefully thought out General Data structure section above. It's okay, there's an app for that (just kidding, but there is this fun script I wrote up!). 
 
-3. Ideally all data products are properly formatted and structured from the start of 
-data collection, but sometimes a few adjustments are needed to make your data more readable and match any required formatting. Here is an example "cleaning" script used to 
-get subcanopy diameter data into proper format for the fortedata package. Most important here is the 1) Use of the `googledrive` package to move smoothly from R to google drive, and 2) some examples of using base R for reformatting (Who ever uses base R!?). In the example of fortedata, there are a few steps you might have to take before using this code below.
+3. Here is an example "cleaning" script used to get subcanopy diameter data into proper format for the fortedata package. Most important is the 1) Use of the `googledrive` package to move (somewhat) smoothly between R to google drive, and 2) some examples of using base R for reformatting (Who ever uses base R!?). In the example of fortedata, there are a few steps you might have to take before using this code below.
 
   + Make sure that the "FoRTE" shared google drive folder is in "My Drive"
-  + Click the dropdown menu next to "My Drive". If FoRTE is listed there, you can skip the following steps.    + If FoRTE is not there:
+  + Click the dropdown menu next to "My Drive". If FoRTE is listed there, you can skip the following steps.
+  + If FoRTE is not there:
   + Click "Shared with me"" (assuming this folder was shared with you at some point) and locate the FoRTE shared folder.
   + Right click and select "Add Shortcut to Drive". Now you can access this shared folder from "My Drive" using the `googledrive` R package.
 
@@ -68,12 +69,20 @@ get subcanopy diameter data into proper format for the fortedata package. Most i
 # this script is an ingestion script for the subcanopy diameter data. In this example, 
 # you can see I've used only base r to reduce dependencies with packages like dplyr
 
+# first step is to install and load the library(googledrive). THis chunk should do that for ya!
 if (!require("googledrive")) {
   install.packages("googledrive")
 }
+library(googledrive)
 
-# Bring in the subcanopy csv's and make the format matching. Then upload them to 
-# google drive
+# Now the workflow here is a bit clunky, butit's the best I could figure out using the
+# google drive package.To summarize, because of the steps above, our data is good and backed up to 
+# the shared FoRTE google drive folder. While you probably have a copy of the raw data file
+# Saved locally on your machine, resist the temptation to source your data locally and use 
+# this package to bring in that remote copy from the shared drive. First, we download the raw
+# data file from drive, then we make the formatting changes we want, and last we upload a new 
+# level 1 version of our data that is nice and pretty and ready to be shared and used by 
+# all the talented scientists out there desperate for our invaluable data. 
 
 # This brings in raw data from the google drive. First I need to id the files I want.
 # An easy way to do this is as follows. q = "starred = true" gets me the file I want quickly,

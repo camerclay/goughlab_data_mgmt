@@ -44,14 +44,25 @@ to the shared forte google drive using the 'googledrive' R package.
 
 ## Data Workflow: Field data to fortedata format
 
-Ideally all data products are properly formatted and structured from the start of 
+1. Use google "Back Up and Sync" to backup your local data folder to google drive 
+  + This ensures all your data and scripts are backed up incase your local machine dies
+  or you throw it in the James or "accidently" drop in the can when R is giving you a hard time.
+  + A couple things to note: 1) You can find this backed-up folder in the "Computers", "My Lapbtop"
+  tab on your google drive. 2) You can create a shortcut (right click, "Add shortcut to drive") and add 
+  it to "My Drive" and likewise a shared folder. 3) When working on an R project, R hates the constant updates to google drive, so you have to pause "Back Up and Sync" while working on a project. Just make sure to resume updates after to ensure all of your work is backed up!  
+2. FoRTE or LTREB will differ slightly, but for either, make sure the raw data files are available in
+  a shared google drive folder (i.e. FoRTE or LAB). There are 2 ways to do this:
+  + Ideally, create a shortcut of your backed up folder (right click, "Add shortcut to drive") and add it to a shared folder. This way, as you update your data file, the updates/new data are automatically backed up to the shared folder. 
+  + Alternately, you can copy the data file into a shared folder OR upload it to a shared folder from your     local machine. This works fine for say a full years worth of data from prior field seasons, or uploading     your data at the end of a season to a **shared folder** (BUT your data is already backed up to google drive because of step 1 above, right!?)  
+
+3. Ideally all data products are properly formatted and structured from the start of 
 data collection, but sometimes a few adjustments are needed to make your data more readable and match any required formatting. Here is an example "cleaning" script used to 
 get subcanopy diameter data into proper format for the fortedata package. Most important here is the 1) Use of the `googledrive` package to move smoothly from R to google drive, and 2) some examples of using base R for reformatting (Who ever uses base R!?). In the example of fortedata, there are a few steps you might have to take before using this code below.
 
-1. Make sure that the `fortedata` shared google drive folder is in "My Drive"
-  + Click the dropdown menu next to "My Drive". If FoRTE is listed there, you can skip the following steps. If FoRTE is not there...
-2. Click "Shared with me"" (assuming this folder was shared with you at some point) and locate the FoRTE shared folder.
-3. Right click and select "Add Shortcut to Drive". Now you can access this shared folder from "My Drive" using the `googledrive` R package.
+  + Make sure that the "FoRTE" shared google drive folder is in "My Drive"
+  + Click the dropdown menu next to "My Drive". If FoRTE is listed there, you can skip the following steps.    + If FoRTE is not there:
+  + Click "Shared with me"" (assuming this folder was shared with you at some point) and locate the FoRTE shared folder.
+  + Right click and select "Add Shortcut to Drive". Now you can access this shared folder from "My Drive" using the `googledrive` R package.
 
 ```{r cleaning, include=TRUE, eval=FALSE}
 # this script is an ingestion script for the subcanopy diameter data. In this example, 
@@ -61,10 +72,40 @@ if (!require("googledrive")) {
   install.packages("googledrive")
 }
 
-# Bring in the desired csv's and make the format matching. Then upload them to 
-# google drive 
+# Bring in the subcanopy csv's and make the format matching. Then upload them to 
+# google drive
 
-sc_2020 <- read.csv("data/subcanopy_D_2020.csv", na.strings = c("", "NA"))
+# This brings in raw data from the google drive. First I need to id the files I want.
+# An easy way to do this is as follows. q = "starred = true" gets me the file I want quickly,
+# but first I need to navigate to the file in My Drive, right click, and select "Add to Starred"
+
+# Let's do this for the 2019 data 
+file_id <- drive_find(type = "csv", pattern = "subcanopy_D.csv", q = "starred = true")
+sc_2019_id <- file_id[[1,2]]
+
+# Now for the 2020
+file_id <- drive_find(type = "csv", pattern = "subcanopy_D_2020.csv", q = "starred = true")
+sc_2020_id <- file_id[[1,2]]
+
+# now I need to download this file and save it to my local data folder. Since I probably 
+# (in my case definitely...) already have a version of this file, I'll name it something
+# different. In this case, I'll use gd for google drive
+
+# alright, first for the 2019
+drive_download(
+  as_id(sc_2019_id), 
+  path = "data/gd_subcanopy_D.csv",
+  overwrite = FALSE)
+
+# and tnow the 2020
+drive_download(
+  as_id(sc_2020_id), 
+  path = "data/gd_subcanopy_D_2020.csv",
+  overwrite = FALSE)
+
+# This brings in the data from my local machine
+sc_2019 <- read.csv("data/gd_subcanopy_D.csv", na.strings = c("", "NA"))
+sc_2020 <- read.csv("data/gd_subcanopy_D_2020.csv", na.strings = c("", "NA"))
 
 # since 2020 is more tidy, I will start there and then reformat 2019 to match it 
 # First step will be to rename column names to match other fortedata products 

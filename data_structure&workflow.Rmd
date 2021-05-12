@@ -5,10 +5,6 @@ date: "May 3, 2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 # General Data Format and Preparation
 
 ***
@@ -21,7 +17,8 @@ to the shared forte google drive using the 'googledrive' R package.
 
 1. Names should be lowercase with "_" separating words.
 2. File Type: CSV (Comma delimited)
-3. Filenames: "data_type_year.csv" (i.e. "canopy_dendroband_2019.csv")
+3. Filenames: "level_data_type_year.csv" (i.e. "raw_canopy_dendroband_2019.csv")
++ level = raw or fd (fortedata); fd is reformatted raw data that is fortedata ready
 4. Folder Names: "data_type" (i.e. "canopy_dendroband")
 5. Include EML approved word document metadata file in each folder (Thanks JT!)
 5. Each year should be 1 data file (but does this make sense for instrument data? Thoughts on this?)

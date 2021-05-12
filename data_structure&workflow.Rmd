@@ -169,3 +169,13 @@ drive_upload(
 )
 
 ```
+
+## Data Workflow: Google Drive to forte data 
+
+1. Download local copy of fd_... (fortedata ready) csv file
+2. Copy file into inst/extdata
+3. Navigate to R/ folder and either find existing function call (i.e. fd_dendro) or create new function 
++ function should pull new csv file, append to other files, and reformat character classes, species codes, and other small fixes 
+4. Add metadata to inst/extdata/forte_table_metadata.csv
+5. Use Build > Check Package to diagnose and correct errors
++ I haven't figured out the Check CMD warnings, sorry! (aka ask BBL or Dr. Atkins)

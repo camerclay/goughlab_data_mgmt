@@ -17,6 +17,8 @@ to the shared forte google drive using the 'googledrive' R package.
 
 1. Names should be lowercase with "_" separating words.
 2. File Type: CSV (Comma delimited)
+My name is Cameron Clay and I'm inserting some weird shit
+%*#$*(@)@!@$*()
 3. Filenames: "level_data_type_year.csv" (i.e. "raw_canopy_dendroband_2019.csv")
 + level = raw, fd (fortedata), or gd (googledrive); fd is reformatted raw data that is fortedata ready, gd is raw data pulled from google drive (intermediate step)
 4. Folder Names: "data_type" (i.e. "canopy_dendroband")
